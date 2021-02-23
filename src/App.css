@@ -1,8 +1,3 @@
-body {
-  background-color: #282c34;
-  color: white;
-}
-
 .donation {
   width: 400px;
   background-color: whitesmoke;
@@ -10,8 +5,10 @@ body {
   padding: 1rem;
   margin: 1rem;
   border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .amount {
-  font-size: 2rem;
+  font-size: 1rem;
 }
