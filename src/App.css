@@ -2,9 +2,8 @@
   width: 400px;
   background-color: whitesmoke;
   color: #282c34;
-  padding: 1rem;
-  margin: 1rem;
   border-radius: 5px;
+  padding: 0 0.5rem;
   display: flex;
   justify-content: space-between;
 }

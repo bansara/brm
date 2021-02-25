@@ -14,7 +14,7 @@ function Payments() {
   // Create a payment intent on the server
   const createPaymentIntent = async (event) => {
     // Clamp amount to Stripe min/max
-    const validAmount = Math.min(Math.max(amount, 100), 9999999);
+    const validAmount = Math.min(Math.max(amount, 1), 9999999);
     setAmount(validAmount);
     /**
      * CALLABLE FUNCTIONS!!
@@ -58,20 +58,11 @@ function Payments() {
 
   return (
     <>
-      <h2>Payments</h2>
-      <p>One-time payment scenario.</p>
-      <div className="well">
+      {/* <div className="well">
         <PaymentIntentData data={paymentIntent} />
-      </div>
-
-      <div className="well">
-        <h3>Step 1: Create a Payment Intent</h3>
-        <p>
-          Change the amount of the payment in the form, then request a Payment
-          Intent to create context for one-time payment. Min 50, Max 9999999
-        </p>
-
-        <div className="form-inline">
+      </div> */}
+      <div>
+        <div>
           <input
             className="form-control"
             type="text"
@@ -90,6 +81,7 @@ function Payments() {
                 }
               }
             }}
+            style={{ lineHeight: "1.5rem", width: "5rem" }}
           />
           <input
             type="text"
@@ -98,12 +90,21 @@ function Payments() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Display Name (optional)"
+            style={{ lineHeight: "1.5rem" }}
           />
           <button
             className="btn btn-success"
             disabled={amount <= 0}
             onClick={createPaymentIntent}
             hidden={paymentIntent}
+            style={{
+              width: "10rem",
+              lineHeight: "1.5rem",
+              backgroundColor: "#f89924",
+              color: "white",
+              padding: "0 1rem",
+              borderRadius: "3px",
+            }}
           >
             Donate ${amount}
           </button>
@@ -115,19 +116,14 @@ function Payments() {
         onSubmit={handleSubmit}
         className="well"
         // hidden={!paymentIntent || paymentIntent.status === "succeeded"}
-        style={{ width: "400px" }}
+        style={{
+          width: "400px",
+          height: `${
+            !paymentIntent || paymentIntent.status === "succeeded" ? 0 : "auto"
+          }`,
+          margin: "1rem 0",
+        }}
       >
-        <h3>Step 2: Submit a Payment Method</h3>
-        <p>Collect credit card details, then submit the payment.</p>
-        <p>
-          Normal Card: <code>4242424242424242</code>
-        </p>
-        <p>
-          3D Secure Card: <code>4000002500003155</code>
-        </p>
-
-        <hr />
-
         <CardElement
           options={{
             style: {
@@ -168,34 +164,34 @@ function Payments() {
   );
 }
 
-function PaymentIntentData(props) {
-  if (props.data) {
-    const { id, amount, status, client_secret } = props.data;
-    return (
-      <>
-        <h3>
-          Payment Intent{" "}
-          <span
-            className={
-              "badge " +
-              (status === "succeeded" ? "badge-success" : "badge-secondary")
-            }
-          >
-            {status}
-          </span>
-        </h3>
-        <pre>
-          ID: {id} <br />
-          Client Secret: {client_secret} <br />
-          Amount: {amount} <br />
-          Status:{status}
-          <br />
-        </pre>
-      </>
-    );
-  } else {
-    return <p>Payment Intent Not Created Yet</p>;
-  }
-}
+// function PaymentIntentData(props) {
+//   if (props.data) {
+//     const { id, amount, status, client_secret } = props.data;
+//     return (
+//       <>
+//         <h3>
+//           Payment Intent{" "}
+//           <span
+//             className={
+//               "badge " +
+//               (status === "succeeded" ? "badge-success" : "badge-secondary")
+//             }
+//           >
+//             {status}
+//           </span>
+//         </h3>
+//         <pre>
+//           ID: {id} <br />
+//           Client Secret: {client_secret} <br />
+//           Amount: {amount} <br />
+//           Status:{status}
+//           <br />
+//         </pre>
+//       </>
+//     );
+//   } else {
+//     return <p>Payment Intent Not Created Yet</p>;
+//   }
+// }
 
 export default Payments;

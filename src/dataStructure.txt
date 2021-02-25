@@ -1,0 +1,21 @@
+EVENT DATA INTERFACE
+Event {
+title: string;
+subtitle: string;
+dates: [{
+date: string; // Saturday, March 20th, 2021
+time: string // 7PM - 9PM
+performerCategories: [{
+name: string;
+artists: [{
+name: string;
+photoURL: string;
+}]
+}];
+}]
+description: string[]; // by paragraph
+credits: [{
+category: string,
+people: string[]
+}]
+}
