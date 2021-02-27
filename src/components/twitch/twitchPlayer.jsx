@@ -1,5 +1,3 @@
-import React from "react";
-
 const TwitchPlayer = () => {
   return (
     <div id="twitch-embed" className="w-screen h-90">
@@ -7,7 +5,7 @@ const TwitchPlayer = () => {
         src="https://player.twitch.tv/?channel=brooklynragamassive&parent=brm-live-portal.web.app&parent=events.brooklynragamassive.org"
         height="100%"
         width="100%"
-        allowfullscreen="<allowfullscreen>"
+        allowFullScreen="<allowfullscreen>"
         title="twitch player"
       ></iframe>
     </div>

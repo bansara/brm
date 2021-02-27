@@ -1,5 +1,4 @@
-import React from "react";
-import "./App.css";
+import React, { lazy, Suspense, useState } from "react";
 import firebase from "firebase/app";
 import "firebase/firestore";
 import { useDocumentDataOnce } from "react-firebase-hooks/firestore";
@@ -10,12 +9,15 @@ import { loadStripe } from "@stripe/stripe-js";
 import EventInfo from "./components/layout/eventInfo";
 import EventDescription from "./components/layout/eventDescription";
 import EventCredits from "./components/layout/eventCredits";
-import Footer from "./components/layout/footer";
 import DonateBtnLg from "./components/layout/donateBtnLg";
 import TwitchPlayer from "./components/twitch/twitchPlayer";
 import Navbar from "./components/layout/navbar";
+import Loading from "./components/layout/loading";
+import DonationChat from "./components/layout/donationChat";
+import Payments from "./components/stripe/payments";
+const Footer = lazy(() => import("./components/layout/footer"));
+// const Donations = lazy(() => import("./components/stripe/donations"));
 // import Payments from "./components/stripe/payments";
-// import Donations from "./components/stripe/donations";
 
 var firebaseConfig = {
   apiKey: "AIzaSyAo8OJWOeTXrjOhPtFKtQz-1B9sgBPu2h8",
@@ -32,16 +34,14 @@ if (!firebase.apps.length) {
 }
 // firebase.analytics();
 export const firestore = firebase.firestore();
-
 const stripePromise = loadStripe("pk_test_fEIiXO5M0hM6EDTyPZmWuHPo");
 
 export const EventContext = React.createContext({});
 
 const App = () => {
-  // const [event, setEvent] = useState({});
   const eventRef = firestore.collection("events").doc("zNSLqSE6wom1RFrH3NtO");
   const [event, loading, error] = useDocumentDataOnce(eventRef);
-  console.log(event);
+  const [showing, setShowing] = useState(false);
   return (
     <EventContext.Provider value={event}>
       <Elements stripe={stripePromise}>
@@ -50,17 +50,26 @@ const App = () => {
             <>
               <Navbar />
               <TwitchPlayer />
+              <DonationChat setShowing={setShowing} />
               <div className="container mx-auto px-2">
                 <EventInfo />
                 <DonateBtnLg />
                 <EventDescription />
                 <EventCredits />
-                <Footer />
+                {/* <Payments /> */}
+                <Suspense fallback={<Loading />}>
+                  <Footer />
+                </Suspense>
+                {showing && <Payments setShowing={setShowing} />}
               </div>
             </>
           )}
           {error && <p>ERROR</p>}
-          {loading && <p>LOADING...</p>}
+          {loading && (
+            <div className="w-screen h-screen flex justify-center items-center">
+              <Loading />
+            </div>
+          )}
         </main>
       </Elements>
     </EventContext.Provider>

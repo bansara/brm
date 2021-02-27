@@ -8,7 +8,6 @@ import { EventContext } from "../../App";
 const EventInfo = () => {
   const event = useContext(EventContext);
   const { title, subtitle, dates } = event;
-  console.log(event);
   return (
     <section>
       <EventTitle title={title} subtitle={subtitle} />

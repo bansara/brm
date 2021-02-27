@@ -35,7 +35,6 @@ app.get("/", (req, res) => {
 const endpointSecret = "whsec_9Bm6HIgmq8RXTpBStIShio2cZUD6cDO0";
 
 app.post("/dbtest", async (req, res) => {
-  // const { amount, name } = req.body;
   const sig = req.headers["stripe-signature"];
 
   let event;
@@ -53,6 +52,7 @@ app.post("/dbtest", async (req, res) => {
       .add({
         amount: req.body.data.object.amount || "",
         event: req.body.data.object.metadata.event || "N/A",
+        eventId: req.body.data.object.metadata.eventId || "",
         name: req.body.data.object.metadata.name || "Anonymous",
         stripeId: req.body.data.object.id || "",
         createdAt: admin.firestore.FieldValue.serverTimestamp(),

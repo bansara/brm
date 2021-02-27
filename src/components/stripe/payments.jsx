@@ -1,21 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import firebase from "firebase/app";
 import "firebase/functions";
 
-function Payments() {
+import { EventContext } from "../../App";
+import Loading from "../layout/loading";
+
+function Payments({ setShowing }) {
+  const event = useContext(EventContext);
   const stripe = useStripe();
   const elements = useElements();
 
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState("");
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [paymentIntent, setPaymentIntent] = useState();
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+  const nameInput = useRef();
+
+  useEffect(() => {
+    nameInput.current.focus();
+  }, []);
+
+  useEffect(() => {
+    console.log(paymentIntent);
+    if (paymentIntent && paymentIntent.status === "succeeded") {
+      setShowing(false);
+    }
+  }, [paymentIntent, setShowing]);
+
+  // financial regex
+  const onlyNumbers = /^[0-9]*(?:\.[0-9]{2})?$/;
 
   // Create a payment intent on the server
-  const createPaymentIntent = async (event) => {
+  const createPaymentIntent = async (e) => {
     // Clamp amount to Stripe min/max
     const validAmount = Math.min(Math.max(amount, 1), 9999999);
     setAmount(validAmount);
+    setLoading(true);
     /**
      * CALLABLE FUNCTIONS!!
      */
@@ -23,21 +46,23 @@ function Payments() {
     getPi({
       amount: Number(amount) * 100,
       metadata: {
-        event: "WRM",
+        eventId: event.uid,
+        email: email,
         name: name || "Anonymous",
       },
     })
       .then(({ data }) => {
         console.log(data);
         setPaymentIntent(data);
+        setLoading(false);
       })
       .catch(console.log);
   };
 
   // Handle the submission of card details
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
     const cardElement = elements.getElement(CardElement);
 
     // Confirm Card Payment
@@ -50,117 +75,170 @@ function Payments() {
 
     if (error) {
       console.error(error);
+      setLoading(false);
       error.payment_intent && setPaymentIntent(error.payment_intent);
+      setErrorMsg(error.message);
     } else {
+      setLoading(false);
       setPaymentIntent(updatedPaymentIntent);
     }
   };
 
   return (
-    <>
-      {/* <div className="well">
-        <PaymentIntentData data={paymentIntent} />
-      </div> */}
-      <div>
-        <div>
-          <input
-            className="form-control"
-            type="text"
-            value={amount}
-            disabled={paymentIntent}
-            placeholder="Donation amount"
-            onChange={(e) => {
-              if (!e.target.value.length) {
-                setAmount("0");
-              }
-              if (Number(e.target.value)) {
-                if (e.target.value[0] === "0") {
-                  setAmount(e.target.value.slice(1));
-                } else {
-                  setAmount(e.target.value);
-                }
-              }
-            }}
-            style={{ lineHeight: "1.5rem", width: "5rem" }}
-          />
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Display Name (optional)"
-            style={{ lineHeight: "1.5rem" }}
-          />
+    <div className="w-screen h-screen overflow-y-scroll bg-transparent flex flex-col justify-center items-center fixed top-0 left-0">
+      <div className="bg-champagne p-2 md:p-8 shadow-xl max-w-sm md:max-w-2xl">
+        <div className="flex justify-between">
           <button
-            className="btn btn-success"
-            disabled={amount <= 0}
-            onClick={createPaymentIntent}
-            hidden={paymentIntent}
-            style={{
-              width: "10rem",
-              lineHeight: "1.5rem",
-              backgroundColor: "#f89924",
-              color: "white",
-              padding: "0 1rem",
-              borderRadius: "3px",
+            onClick={() => {
+              setPaymentIntent(undefined);
+              setErrorMsg("");
             }}
           >
-            Donate ${amount}
+            {paymentIntent ? "Back" : ""}
+          </button>
+          <button
+            className="h-8 w-8 border-2 border-black rounded-full justify-self-end"
+            onClick={() => setShowing(false)}
+          >
+            X
           </button>
         </div>
+        <div className="max-w-screen-sm mx-auto px-2">
+          <p className="font-serif text-2xl md:text-3xl my-6">
+            Support Brooklyn Raga Massive
+          </p>
+          <p>
+            Your contribution will be broadcast live on the page! Leave your
+            name blank to remain anonymous.
+          </p>
+        </div>
+        <div className="bg-champagneDark p-1 md:p-16 my-4">
+          {loading ? (
+            <Loading />
+          ) : (
+            <div
+              className={`block donateIntent ${
+                !paymentIntent || paymentIntent.status !== "requires_source"
+                  ? "showing"
+                  : ""
+              }`}
+            >
+              <input
+                type="text"
+                name="name"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="block py-2 bg-champagneDark text-xl border-black border-b-2 w-full overflow-visible"
+                placeholder="Name"
+                ref={nameInput}
+              />
+              <label htmlFor="name" className="block  mb-4 text-sm">
+                Display Name (optional)
+              </label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="block py-2 bg-champagneDark text-xl border-black border-b-2 w-full"
+                placeholder="Email"
+              />
+              <label htmlFor="email" className="block text-sm mb-4">
+                Your Email (optional)
+              </label>
+              <input
+                className="block py-2 bg-champagneDark text-xl border-black border-b-2 w-full"
+                type="text"
+                name="amount"
+                value={amount}
+                // disabled={paymentIntent}
+                placeholder="$ Amount"
+                onChange={(e) => {
+                  if (!e.target.value.length) {
+                    setAmount("0");
+                  }
+                  if (Number(e.target.value)) {
+                    if (
+                      e.target.value.length > 1 &&
+                      e.target.value[0] === "0"
+                    ) {
+                      setAmount(e.target.value.slice(1));
+                    } else {
+                      setAmount(e.target.value);
+                    }
+                  }
+                }}
+              />
+              <label htmlFor="amount" className="block mb-4 text-sm">
+                Gift amount
+              </label>
+              <button
+                disabled={amount <= 0}
+                onClick={createPaymentIntent}
+                hidden={paymentIntent}
+                className="block bg-gold py-2 px-8 rounded mx-auto text-white text-large my-8"
+              >
+                Donate
+              </button>
+            </div>
+          )}
+          <form
+            onSubmit={handleSubmit}
+            className="w-full"
+            hidden={!paymentIntent || paymentIntent.status === "succeeded"}
+          >
+            <p className="text-pink">{errorMsg}</p>
+            <div className="bg-champagne p-2 rounded">
+              <CardElement
+                className="py-2"
+                options={{
+                  style: {
+                    base: {
+                      iconColor: "#c4f0ff",
+                      backgroundColor: "rgb(245, 238, 235)",
+                      fontWeight: "400",
+                      fontFamily: "'Lato', sans-serif",
+                      fontSize: "18px",
+                      fontSmoothing: "antialiased",
+                      ":-webkit-autofill": {
+                        color: "#fce883",
+                      },
+                      "::placeholder": {
+                        color: "#222",
+                        backgroundColor: "rgb(245, 238, 235)",
+                      },
+                    },
+                    invalid: {
+                      iconColor: "rgb(232, 66, 119)",
+                      color: "rgb(232, 66, 119)",
+                    },
+                  },
+                }}
+                onFocus={() => setErrorMsg("")}
+              />
+            </div>
+            <button
+              className="block my-4 py-2 px-8 bg-gold text-white text-base rounded"
+              type="submit"
+            >
+              Pay ${amount}
+            </button>
+          </form>
+          <p
+            className={`${
+              paymentIntent &&
+              paymentIntent.status === "requires_payment_method"
+                ? ""
+                : "hidden"
+            }`}
+          >
+            Error Processing Payment
+          </p>
+        </div>
       </div>
-      <hr />
-
-      <form
-        onSubmit={handleSubmit}
-        className="well"
-        // hidden={!paymentIntent || paymentIntent.status === "succeeded"}
-        style={{
-          width: "400px",
-          height: `${
-            !paymentIntent || paymentIntent.status === "succeeded" ? 0 : "auto"
-          }`,
-          margin: "1rem 0",
-        }}
-      >
-        <CardElement
-          options={{
-            style: {
-              base: {
-                iconColor: "#c4f0ff",
-                color: "#000",
-                fontWeight: "500",
-                fontFamily: "Roboto, Open Sans, Segoe UI, sans-serif",
-                fontSize: "16px",
-                fontSmoothing: "antialiased",
-                lineHeight: "2rem",
-                ":-webkit-autofill": {
-                  color: "#fce883",
-                },
-                "::placeholder": {
-                  color: "777",
-                },
-              },
-              invalid: {
-                iconColor: "#cc0000",
-                color: "#cc0000",
-              },
-            },
-          }}
-        />
-        <button
-          className="btn btn-success"
-          type="submit"
-          style={{
-            width: "100%",
-            padding: "0.25rem",
-          }}
-        >
-          Pay
-        </button>
-      </form>
-    </>
+    </div>
   );
 }
 

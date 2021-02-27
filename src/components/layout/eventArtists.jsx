@@ -6,9 +6,7 @@ const EventArtists = ({ performerCategories }) => {
     <div className="border-b-2 border-gray pb-12 flex-1 mt-0">
       {performerCategories.map((category) => (
         <div key={category.name}>
-          <h4 className="font-sans uppercase text-base font-bold mb-4">
-            {category.name}
-          </h4>
+          <p className="font-sans uppercase my-4">{category.name}</p>
           {category.artists.map((artist) => (
             <EventArtist
               photoURL={artist.photoURL}

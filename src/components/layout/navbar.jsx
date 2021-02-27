@@ -2,7 +2,7 @@ import React from "react";
 
 const Navbar = () => {
   return (
-    <nav className="h-12 flex items-center justify-between font-serif w-screen px-12">
+    <nav className="h-12 flex items-center justify-between font-serif w-screen px-4">
       <a
         href="https://brooklynragamassive.org"
         target="_blank"
