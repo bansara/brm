@@ -31,7 +31,6 @@ function Payments({ setShowing }) {
   }, []);
 
   useEffect(() => {
-    console.log(paymentIntent);
     if (paymentIntent && paymentIntent.status === "succeeded") {
       setShowing(false);
     }
@@ -78,7 +77,6 @@ function Payments({ setShowing }) {
         },
       })
         .then(({ data }) => {
-          console.log(data);
           setPaymentIntent(data);
           setLoading(false);
         })
