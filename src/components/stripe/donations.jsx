@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useLayoutEffect } from "react";
+import { useContext, useRef, useLayoutEffect } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
 import { firestore, EventContext } from "../../App";
@@ -60,7 +60,7 @@ const Donations = ({ setShowing }) => {
           ))}
         <div></div>
       </div>
-      <div className="py-2 bg-white  flex-1">
+      <div className="py-4 bg-white flex items-end  flex-1 max-h-16">
         <DonateBtnSm setShowing={setShowing} />
       </div>
     </div>

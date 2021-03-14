@@ -1,5 +1,3 @@
-import React from "react";
-
 const EventDateTime = ({ date, time }) => {
   return (
     <time className="block mt-8 mb-4">

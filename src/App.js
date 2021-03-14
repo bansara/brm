@@ -1,23 +1,20 @@
-import React, { lazy, Suspense, useState } from "react";
+import React, { lazy, Suspense } from "react";
+import { Toaster } from "react-hot-toast";
 import firebase from "firebase/app";
 import "firebase/firestore";
+import "firebase/storage";
 import { useDocumentDataOnce } from "react-firebase-hooks/firestore";
 
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
-import EventInfo from "./components/layout/eventInfo";
-import EventDescription from "./components/layout/eventDescription";
-import EventCredits from "./components/layout/eventCredits";
-import DonateBtnLg from "./components/layout/donateBtnLg";
 import TwitchPlayer from "./components/twitch/twitchPlayer";
 import Navbar from "./components/layout/navbar";
 import Loading from "./components/layout/loading";
 import DonationChat from "./components/layout/donationChat";
-import Payments from "./components/stripe/payments";
+
+const EventInfo = lazy(() => import("./components/layout/eventInfo"));
 const Footer = lazy(() => import("./components/layout/footer"));
-// const Donations = lazy(() => import("./components/stripe/donations"));
-// import Payments from "./components/stripe/payments";
 
 var firebaseConfig = {
   apiKey: "AIzaSyAo8OJWOeTXrjOhPtFKtQz-1B9sgBPu2h8",
@@ -34,43 +31,52 @@ if (!firebase.apps.length) {
 }
 // firebase.analytics();
 export const firestore = firebase.firestore();
-const stripePromise = loadStripe("pk_test_fEIiXO5M0hM6EDTyPZmWuHPo");
+export const storage = firebase.storage();
+
+const stripePromise = loadStripe(
+  "pk_live_51IRgekD14wAe03PrJqAhayXPFSzg3JppgQuycgqryzPGRiWaiBj4Ybjelss3ApqAl01B4MRLyjsT783sHrfCpbV200GulW5BDg"
+);
 
 export const EventContext = React.createContext({});
 
 const App = () => {
   const eventRef = firestore.collection("events").doc("zNSLqSE6wom1RFrH3NtO");
   const [event, loading, error] = useDocumentDataOnce(eventRef);
-  const [showing, setShowing] = useState(false);
+
   return (
     <EventContext.Provider value={event}>
       <Elements stripe={stripePromise}>
         <main>
+          <Navbar />
+          <TwitchPlayer />
           {event && (
             <>
-              <Navbar />
-              <TwitchPlayer />
-              <DonationChat setShowing={setShowing} />
+              <DonationChat />
               <div className="container mx-auto px-2">
-                <EventInfo />
-                <DonateBtnLg />
-                <EventDescription />
-                <EventCredits />
-                {/* <Payments /> */}
+                <Suspense fallback={<Loading />}>
+                  <EventInfo />
+                </Suspense>
                 <Suspense fallback={<Loading />}>
                   <Footer />
                 </Suspense>
-                {showing && <Payments setShowing={setShowing} />}
               </div>
             </>
           )}
-          {error && <p>ERROR</p>}
-          {loading && (
-            <div className="w-screen h-screen flex justify-center items-center">
-              <Loading />
-            </div>
-          )}
+          <Toaster
+            position="bottom-center"
+            toastOptions={{
+              duration: 7000,
+              margin: "80px",
+              className: "bg-champagneDark p-4 w-80 text-lg",
+            }}
+          />
         </main>
+        {error && <p>ERROR</p>}
+        {loading && (
+          <div className="w-screen h-screen flex justify-center items-center">
+            <Loading />
+          </div>
+        )}
       </Elements>
     </EventContext.Provider>
   );

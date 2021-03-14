@@ -1,4 +1,3 @@
-import React from "react";
 import EventArtist from "./eventArtist";
 
 const EventArtists = ({ performerCategories }) => {

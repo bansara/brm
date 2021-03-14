@@ -1,12 +1,18 @@
-import React, { useContext } from "react";
+import { useState, useContext } from "react";
+import { EventContext } from "../../App";
+
 import EventDateTime from "./eventDateTime";
 import EventTitle from "./eventTitle";
 import EventArtists from "./eventArtists";
-
-import { EventContext } from "../../App";
+import EventDescription from "./eventDescription";
+import EventCredits from "./eventCredits";
+import DonateBtnLg from "./donateBtnLg";
+import Payments from "../stripe/payments";
 
 const EventInfo = () => {
   const event = useContext(EventContext);
+
+  const [showing, setShowing] = useState(false);
   const { title, subtitle, dates } = event;
   return (
     <section>
@@ -19,6 +25,10 @@ const EventInfo = () => {
           </div>
         ))}
       </div>
+      <DonateBtnLg setShowing={setShowing} />
+      <EventDescription />
+      <EventCredits />
+      {showing && <Payments setShowing={setShowing} />}
     </section>
   );
 };

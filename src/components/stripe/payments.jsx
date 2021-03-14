@@ -1,7 +1,11 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import BackBtn from "../layout/backBtn";
+import CloseBtn from "../layout/closeBtn";
+
 import firebase from "firebase/app";
 import "firebase/functions";
+import toast from "react-hot-toast";
 
 import { EventContext } from "../../App";
 import Loading from "../layout/loading";
@@ -15,7 +19,10 @@ function Payments({ setShowing }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [paymentIntent, setPaymentIntent] = useState();
-  const [errorMsg, setErrorMsg] = useState("");
+  const [paymentIntentErrorMsg, setPaymentIntentErrorMsg] = useState();
+  const [cardPaymentErrorMsg, setCardPaymentErrorMsg] = useState("");
+  const [emailFormatErrorMsg, setEmailFormatErrorMsg] = useState("");
+  const [amountFormatErrorMsg, setAmountFormatErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const nameInput = useRef();
 
@@ -31,32 +38,54 @@ function Payments({ setShowing }) {
   }, [paymentIntent, setShowing]);
 
   // financial regex
-  const onlyNumbers = /^[0-9]*(?:\.[0-9]{2})?$/;
+
+  const isDonationFormValid = () => {
+    const isValidPriceFormat = /^[0-9]*(?:\.[0-9]{2})?$/;
+    const isValidEmailFormat = /^[a-zA-Z0-9_.]+@[a-zA-Z0-9-.]+\.[a-z]{2,}$/;
+
+    const isValidPrice = amount.length && isValidPriceFormat.test(amount);
+    const isValidEmail = email.length && isValidEmailFormat.test(email);
+    if (!isValidPrice) {
+      setAmountFormatErrorMsg("Please enter a valid dollar amount");
+    }
+    if (!isValidEmail) {
+      if (!email.length) {
+        setEmailFormatErrorMsg("Email is required");
+        return false;
+      }
+      setEmailFormatErrorMsg("Please enter a valid email address");
+    }
+    return isValidEmail && isValidPrice;
+  };
 
   // Create a payment intent on the server
   const createPaymentIntent = async (e) => {
-    // Clamp amount to Stripe min/max
-    const validAmount = Math.min(Math.max(amount, 1), 9999999);
-    setAmount(validAmount);
-    setLoading(true);
-    /**
-     * CALLABLE FUNCTIONS!!
-     */
-    const getPi = firebase.functions().httpsCallable("paymentIntent");
-    getPi({
-      amount: Number(amount) * 100,
-      metadata: {
-        eventId: event.uid,
-        email: email,
-        name: name || "Anonymous",
-      },
-    })
-      .then(({ data }) => {
-        console.log(data);
-        setPaymentIntent(data);
-        setLoading(false);
+    if (isDonationFormValid()) {
+      // Clamp amount to Stripe min/max
+      const validAmount = Math.min(Math.max(amount, 0.5), 9999999);
+      setAmount(validAmount);
+      setLoading(true);
+      /**
+       * CALLABLE FUNCTIONS!!
+       */
+      const getPi = firebase.functions().httpsCallable("paymentIntent");
+      getPi({
+        amount: Number(amount) * 100,
+        metadata: {
+          eventId: event.uid,
+          email: email,
+          name: name || "Anonymous",
+        },
       })
-      .catch(console.log);
+        .then(({ data }) => {
+          console.log(data);
+          setPaymentIntent(data);
+          setLoading(false);
+        })
+        .catch(() => {
+          setPaymentIntentErrorMsg("Error. Please Try Again.");
+        });
+    }
   };
 
   // Handle the submission of card details
@@ -77,34 +106,33 @@ function Payments({ setShowing }) {
       console.error(error);
       setLoading(false);
       error.payment_intent && setPaymentIntent(error.payment_intent);
-      setErrorMsg(error.message);
+      setCardPaymentErrorMsg(error.message);
+      toast.error(error.message);
     } else {
       setLoading(false);
       setPaymentIntent(updatedPaymentIntent);
+      toast.success("Thank You! Your payment has been processed.");
     }
   };
 
   return (
-    <div className="w-screen h-screen overflow-y-scroll bg-transparent flex flex-col justify-center items-center fixed top-0 left-0">
-      <div className="bg-champagne p-2 md:p-8 shadow-xl max-w-sm md:max-w-2xl">
-        <div className="flex justify-between">
+    <div className="w-screen h-screen overflow-y-scroll bg-opaque flex flex-col justify-center items-center fixed top-0 left-0">
+      <div className="bg-champagne p-2 md:p-8 shadow-xl max-w-sm max-h-screen overflow-y-scroll md:max-w-lg">
+        <div className="flex justify-between items-center">
           <button
             onClick={() => {
               setPaymentIntent(undefined);
-              setErrorMsg("");
+              setCardPaymentErrorMsg("");
             }}
           >
-            {paymentIntent ? "Back" : ""}
+            {paymentIntent ? <BackBtn /> : ""}
           </button>
-          <button
-            className="h-8 w-8 border-2 border-black rounded-full justify-self-end"
-            onClick={() => setShowing(false)}
-          >
-            X
+          <button onClick={() => setShowing(false)}>
+            <CloseBtn />
           </button>
         </div>
         <div className="max-w-screen-sm mx-auto px-2">
-          <p className="font-serif text-2xl md:text-3xl my-6">
+          <p className="font-serif text-2xl md:text-3xl mb-6 mt-0">
             Support Brooklyn Raga Massive
           </p>
           <p>
@@ -112,84 +140,83 @@ function Payments({ setShowing }) {
             name blank to remain anonymous.
           </p>
         </div>
-        <div className="bg-champagneDark p-1 md:p-16 my-4">
-          {loading ? (
+        <div className="bg-champagneDark px-1 pb-1 md:px-8 md:pb-8 my-4">
+          <div className="h-20">{!!loading && <Loading />}</div>
+          {/* {loading ? (
             <Loading />
-          ) : (
-            <div
-              className={`block donateIntent ${
-                !paymentIntent || paymentIntent.status !== "requires_source"
-                  ? "showing"
-                  : ""
-              }`}
+          ) : ( */}
+          <div
+            className={`block donateIntent ${!paymentIntent ? "showing" : ""}`}
+          >
+            <p className="text-pink text-sm">{paymentIntentErrorMsg}</p>
+            <input
+              type="text"
+              name="name"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="block py-2 bg-champagneDark text-xl border-black border-b-2 w-full overflow-visible"
+              placeholder="Name"
+              ref={nameInput}
+            />
+            <label htmlFor="name" className="block  mb-4 text-sm">
+              Name you would like displayed live on broadcast page
+            </label>
+            <p className="text-pink text-sm h-4">{emailFormatErrorMsg}</p>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="block py-2 bg-champagneDark text-xl border-black border-b-2 w-full"
+              placeholder="Email"
+              onFocus={() => setEmailFormatErrorMsg("")}
+            />
+            <label htmlFor="email" className="block text-sm mb-4">
+              Your Email
+            </label>
+            <p className="text-pink text-sm h-4">{amountFormatErrorMsg}</p>
+            <input
+              className="block py-2 bg-champagneDark text-xl border-black border-b-2 w-full"
+              type="text"
+              name="amount"
+              value={amount}
+              // disabled={paymentIntent}
+              placeholder="$ Amount"
+              onChange={(e) => {
+                if (!e.target.value.length) {
+                  setAmount("0");
+                }
+                if (Number(e.target.value)) {
+                  if (e.target.value.length > 1 && e.target.value[0] === "0") {
+                    setAmount(e.target.value.slice(1));
+                  } else {
+                    setAmount(e.target.value);
+                  }
+                }
+              }}
+              onFocus={() => setAmountFormatErrorMsg("")}
+            />
+            <label htmlFor="amount" className="block mb-4 text-sm">
+              Gift Amount
+            </label>
+            <button
+              // disabled={amount <= 0}
+              onClick={createPaymentIntent}
+              // hidden={paymentIntent}
+              className="block bg-gold hover:bg-red hover:shadow-md transition-all py-2 px-8 rounded mx-auto text-white text-large my-8"
             >
-              <input
-                type="text"
-                name="name"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="block py-2 bg-champagneDark text-xl border-black border-b-2 w-full overflow-visible"
-                placeholder="Name"
-                ref={nameInput}
-              />
-              <label htmlFor="name" className="block  mb-4 text-sm">
-                Display Name (optional)
-              </label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="block py-2 bg-champagneDark text-xl border-black border-b-2 w-full"
-                placeholder="Email"
-              />
-              <label htmlFor="email" className="block text-sm mb-4">
-                Your Email (optional)
-              </label>
-              <input
-                className="block py-2 bg-champagneDark text-xl border-black border-b-2 w-full"
-                type="text"
-                name="amount"
-                value={amount}
-                // disabled={paymentIntent}
-                placeholder="$ Amount"
-                onChange={(e) => {
-                  if (!e.target.value.length) {
-                    setAmount("0");
-                  }
-                  if (Number(e.target.value)) {
-                    if (
-                      e.target.value.length > 1 &&
-                      e.target.value[0] === "0"
-                    ) {
-                      setAmount(e.target.value.slice(1));
-                    } else {
-                      setAmount(e.target.value);
-                    }
-                  }
-                }}
-              />
-              <label htmlFor="amount" className="block mb-4 text-sm">
-                Gift amount
-              </label>
-              <button
-                disabled={amount <= 0}
-                onClick={createPaymentIntent}
-                hidden={paymentIntent}
-                className="block bg-gold py-2 px-8 rounded mx-auto text-white text-large my-8"
-              >
-                Donate
-              </button>
-            </div>
-          )}
+              Donate
+            </button>
+          </div>
+          {/* )} */}
           <form
             onSubmit={handleSubmit}
             className="w-full"
             hidden={!paymentIntent || paymentIntent.status === "succeeded"}
           >
-            <p className="text-pink">{errorMsg}</p>
+            <p className="text-pink h-1">{cardPaymentErrorMsg}</p>
             <div className="bg-champagne p-2 rounded">
               <CardElement
                 className="py-2"
@@ -216,60 +243,25 @@ function Payments({ setShowing }) {
                     },
                   },
                 }}
-                onFocus={() => setErrorMsg("")}
+                onFocus={() => setCardPaymentErrorMsg("")}
               />
             </div>
             <button
-              className="block my-4 py-2 px-8 bg-gold text-white text-base rounded"
+              className="block my-4 py-2 px-8 bg-gold hover:bg-red hover:shadow-md transition-all text-white text-base rounded"
               type="submit"
             >
-              Pay ${amount}
+              Pay ${Number(amount).toFixed(2)}
             </button>
           </form>
-          <p
-            className={`${
-              paymentIntent &&
-              paymentIntent.status === "requires_payment_method"
-                ? ""
-                : "hidden"
-            }`}
-          >
-            Error Processing Payment
-          </p>
         </div>
+        <p className="text-xs">
+          Brooklyn Raga Massive is a registered 501 (c) 3 non profit
+          organization. Your donation is tax-deductible. We will email you your
+          acknowledgement letter.
+        </p>
       </div>
     </div>
   );
 }
-
-// function PaymentIntentData(props) {
-//   if (props.data) {
-//     const { id, amount, status, client_secret } = props.data;
-//     return (
-//       <>
-//         <h3>
-//           Payment Intent{" "}
-//           <span
-//             className={
-//               "badge " +
-//               (status === "succeeded" ? "badge-success" : "badge-secondary")
-//             }
-//           >
-//             {status}
-//           </span>
-//         </h3>
-//         <pre>
-//           ID: {id} <br />
-//           Client Secret: {client_secret} <br />
-//           Amount: {amount} <br />
-//           Status:{status}
-//           <br />
-//         </pre>
-//       </>
-//     );
-//   } else {
-//     return <p>Payment Intent Not Created Yet</p>;
-//   }
-// }
 
 export default Payments;

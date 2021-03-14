@@ -32,9 +32,9 @@ app.get("/", (req, res) => {
   });
 });
 
-const endpointSecret = "whsec_9Bm6HIgmq8RXTpBStIShio2cZUD6cDO0";
+const endpointSecret = functions.config().stripe.endpointsecret;
 
-app.post("/dbtest", async (req, res) => {
+app.post("/payment", async (req, res) => {
   const sig = req.headers["stripe-signature"];
 
   let event;
@@ -45,6 +45,7 @@ app.post("/dbtest", async (req, res) => {
     console.log(err);
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
+  console.log(event);
   if (event.type === "payment_intent.succeeded") {
     admin
       .firestore()
@@ -69,11 +70,11 @@ app.post("/dbtest", async (req, res) => {
   }
 });
 
-app.post("/payments", async (req, res) => {
-  const { amount, metadata } = req.body;
-  const paymentIntent = await createPaymentIntent(amount, metadata);
-  res.status(201).send(paymentIntent);
-});
+// app.post("/payments", async (req, res) => {
+//   const { amount, metadata } = req.body;
+//   const paymentIntent = await createPaymentIntent(amount, metadata);
+//   res.status(201).send(paymentIntent);
+// });
 
 exports.api = functions.https.onRequest(app);
 
@@ -82,7 +83,6 @@ async function createPaymentIntent(data) {
     ...data,
     currency: "usd",
   });
-
   return paymentIntent;
 }
 

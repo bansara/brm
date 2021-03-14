@@ -1,5 +1,3 @@
-import React from "react";
-
 const EventTitle = ({ title, subtitle }) => {
   return (
     <header className="py-24 border-b-2 border-gray">

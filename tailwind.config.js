@@ -11,8 +11,10 @@ module.exports = {
       gold: "#F89924",
       blue: "#155EAA",
       pink: "#E84277",
-      grayDark: "#7F7F7F",
+      grayDark: "#4f4f4f",
       gray: "#B2B2B2",
+      red: "#AC1545",
+      opaque: "rgba(0,0,0,0.5)",
     },
     container: {
       center: true,
