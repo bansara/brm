@@ -16,14 +16,7 @@ const MerchItem = ({ item }) => {
         target="_blank"
         rel="noreferrer"
       >
-        <img
-          src={url}
-          width="300"
-          height="300"
-          loading="lazy"
-          alt={name}
-          className="bg-white"
-        />
+        <img src={url} width="300" height="300" loading="lazy" alt={name} />
         <div>
           <p className="font-bold text-sm my-2">{name}</p>
           <p className="text-sm my-2">${price} USD</p>

@@ -11,7 +11,7 @@ const Merch = ({ event }) => {
           for mechandise offerings related to the festival.{" "}
         </p>
         <p className="text-sm text-grayDark text-center">
-          *Shipments will begin on April 10th.
+          *Shipments will begin on April 20th.
         </p>
       </div>
       <div className="sm:grid justify-items-center sm:gap-4 sm:grid-rows-merchSm sm:grid-cols-merchSm xl:grid-cols-merchMd xl:grid-rows-merchMd mx-auto">
@@ -60,6 +60,16 @@ const Merch = ({ event }) => {
         >
           <a href="https://coltraneragatribute.bandcamp.com/album/coltrane-raga-tribute">
             Coltrane Raga Tribute by Brooklyn Raga Massive
+          </a>
+        </iframe>
+        <iframe
+          title="Ragamala"
+          style={{ border: 0, width: "300px", height: "420px" }}
+          src="https://bandcamp.com/EmbeddedPlayer/album=57909673/size=large/bgcol=ffffff/linkcol=0687f5/tracklist=false/transparent=true/"
+          seamless
+        >
+          <a href="https://goorganicorchestra.bandcamp.com/album/ragmala-a-garland-of-ragas">
+            Ragmala: A Garland of Ragas by Go: Organic Orchestra
           </a>
         </iframe>
       </div>
