@@ -8,6 +8,7 @@ import EventDescription from "./eventDescription";
 import EventCredits from "./eventCredits";
 import DonateBtnLg from "./donateBtnLg";
 import Payments from "../stripe/payments";
+import Merch from "./merch";
 
 const EventInfo = () => {
   const event = useContext(EventContext);
@@ -28,6 +29,7 @@ const EventInfo = () => {
       <DonateBtnLg setShowing={setShowing} />
       <EventDescription />
       <EventCredits />
+      <Merch event={event} />
       {showing && <Payments setShowing={setShowing} />}
     </section>
   );

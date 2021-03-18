@@ -1,5 +1,7 @@
 import { useState, useContext, useEffect, useRef } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { FaStripe } from "react-icons/fa";
+
 import BackBtn from "../layout/backBtn";
 import CloseBtn from "../layout/closeBtn";
 
@@ -228,7 +230,7 @@ function Payments({ setShowing }) {
                       fontSize: "18px",
                       fontSmoothing: "antialiased",
                       ":-webkit-autofill": {
-                        color: "#fce883",
+                        color: "#222",
                       },
                       "::placeholder": {
                         color: "#222",
@@ -245,18 +247,24 @@ function Payments({ setShowing }) {
               />
             </div>
             <button
-              className="block my-4 py-2 px-8 bg-gold hover:bg-red hover:shadow-md transition-all text-white text-base rounded"
+              className="block my-4 py-2 px-8 bg-gold hover:bg-red hover:shadow-md transition-all text-black hover:text-white text-base rounded"
               type="submit"
             >
-              Pay ${Number(amount).toFixed(2)}
+              Donate ${Number(amount).toFixed(2)}
             </button>
           </form>
         </div>
-        <p className="text-xs">
+        <p className="text-sm">
           Brooklyn Raga Massive is a registered 501 (c) 3 non profit
           organization. Your donation is tax-deductible. We will email you your
           acknowledgement letter.
         </p>
+        <a href="https://stripe.com" target="_blank" rel="noreferrer">
+          <div className="bg-white w-24 my-4 py-2 mx-auto flex flex-col justify-center items-center">
+            <p className="text-xs -mb-4">Secured by</p>
+            <FaStripe size="3.5rem" style={{ marginBottom: "-1rem" }} />
+          </div>
+        </a>
       </div>
     </div>
   );

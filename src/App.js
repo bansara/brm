@@ -42,7 +42,6 @@ export const EventContext = React.createContext({});
 const App = () => {
   const eventRef = firestore.collection("events").doc("zNSLqSE6wom1RFrH3NtO");
   const [event, loading, error] = useDocumentDataOnce(eventRef);
-
   return (
     <EventContext.Provider value={event}>
       <Elements stripe={stripePromise}>

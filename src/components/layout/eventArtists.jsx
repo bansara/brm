@@ -10,6 +10,7 @@ const EventArtists = ({ performerCategories }) => {
             <EventArtist
               photoURL={artist.photoURL}
               name={artist.name}
+              link={artist.link}
               key={artist.name}
             />
           ))}

@@ -28,6 +28,7 @@ module.exports = {
       serif: ["Alegreya", "serif"],
     },
     fontSize: {
+      xs: ["10px", "10px"],
       sm: ["15px", "18px"],
       base: ["18px", "22px"],
       large: ["20px", "24px"],
@@ -49,6 +50,14 @@ module.exports = {
       borderRadius: {
         "4xl": "2rem",
       },
+      gridTemplateRows: {
+        merchMd: "repeat(2, minmax(300px, 1fr))",
+        merchSm: "repeat(3, minmax(300px, 1fr)) 1fr",
+      },
+      gridTemplateColumns: {
+        merchMd: "repeat(3, minmax(300px, 1fr))",
+        merchSm: "repeat(2, minmax(300px, 1fr))",
+      },
     },
   },
   variants: {
@@ -64,6 +73,9 @@ module.exports = {
           width: "100%",
           "@screen sm": {
             maxWidth: "640px",
+          },
+          "@screen md": {
+            maxWidth: "768px",
           },
           "@screen xl": {
             maxWidth: "1024px",
