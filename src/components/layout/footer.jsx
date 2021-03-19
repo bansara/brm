@@ -40,7 +40,7 @@ const Footer = () => {
             href="https://www.brooklynragamassive.org/about/our-team"
             target="_blank"
             rel="noreferrer"
-            className="text-center hover:underline"
+            className="text-center lg:text-left hover:underline"
           >
             About Us
           </a>
@@ -48,7 +48,7 @@ const Footer = () => {
             href="https://www.brooklynragamassive.org/music/performance"
             target="_blank"
             rel="noreferrer"
-            className="text-center hover:underline"
+            className="text-center lg:text-left hover:underline"
           >
             Music
           </a>
@@ -56,7 +56,7 @@ const Footer = () => {
             href="https://www.brooklynragamassive.org/education"
             target="_blank"
             rel="noreferrer"
-            className="text-center hover:underline"
+            className="text-center lg:text-left hover:underline"
           >
             Education
           </a>
@@ -64,7 +64,7 @@ const Footer = () => {
             href="https://www.brooklynragamassive.org/events"
             target="_blank"
             rel="noreferrer"
-            className="text-center hover:underline"
+            className="text-center lg:text-left hover:underline"
           >
             Events
           </a>
@@ -72,7 +72,7 @@ const Footer = () => {
             href="https://www.brooklynragamassive.org/support-us"
             target="_blank"
             rel="noreferrer"
-            className="text-center hover:underline"
+            className="text-center lg:text-left hover:underline"
           >
             Support Us
           </a>
