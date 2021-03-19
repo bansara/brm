@@ -55,10 +55,10 @@ const App = () => {
                 <Suspense fallback={<Loading />}>
                   <EventInfo />
                 </Suspense>
-                <Suspense fallback={<Loading />}>
-                  <Footer />
-                </Suspense>
               </div>
+              <Suspense fallback={<Loading />}>
+                <Footer />
+              </Suspense>
             </>
           )}
           <Toaster
