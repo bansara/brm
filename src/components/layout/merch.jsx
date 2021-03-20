@@ -64,7 +64,12 @@ const Merch = ({ event }) => {
         </iframe>
         <iframe
           title="Ragamala"
-          style={{ border: 0, width: "300px", height: "420px" }}
+          style={{
+            border: 0,
+            width: "300px",
+            height: "420px",
+            margin: "0 auto 1rem",
+          }}
           src="https://bandcamp.com/EmbeddedPlayer/album=57909673/size=large/bgcol=ffffff/linkcol=0687f5/tracklist=false/transparent=true/"
           seamless
         >
