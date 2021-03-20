@@ -29,6 +29,7 @@ const Footer = () => {
             alt="Brooklyn Raga Massive Logo"
             width="195"
             height="80"
+            className="mx-auto"
           />
         </a>
         <p className="text-center my-8">
